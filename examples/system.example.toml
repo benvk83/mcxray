@@ -1,0 +1,33 @@
+# Template for a system file.
+#
+# Copy this to `system.toml` inside a folder holding the system's files
+# (.xyz, the .gbw with CASSCF orbitals, the ORCA .inp/.out), then point any
+# step at the folder, or run it from there:
+#
+#     mcxray 02 --system=/path/to/folder
+#
+# Relative paths below resolve against this file's directory. See the
+# docstring of mcxray/systems.py for what each key means, and
+# examples/ticl3/system.toml for how the root counts are derived.
+
+# name = "fecl4"            # optional; defaults to the folder name
+# run_dir = "."             # optional; where inputs live and outputs go
+# orca_dir = "."            # optional; where step 01 finds <orca_job>.inp
+
+orca_job = "mysys_casscf"   # step 01 runs <orca_job>.inp; step 02 reads <orca_job>.out
+gbw      = "mysys_casscf"   # basename of the .gbw holding the CASSCF orbitals
+xyz      = "mysys.xyz"
+
+basis  = "def2-svp"
+charge = 0
+spin   = 1                  # 2S, as PySCF wants it
+metal  = "Ti"               # element symbol as PySCF prints AO labels
+
+nelec_valence = 1
+norb_valence  = 5
+n_valence_roots = 5         # full d^n ligand-field manifold
+nroots_core     = 30        # full 2p^5 d^(n+1) manifold
+
+# Optional:
+spins = [0.5, 1.5]          # only used by 04 --per-spin
+soc_max_bytes = "200m"      # SOC integral batch size; int or "16g" / "200m"

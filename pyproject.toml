@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcxray"
+dynamic = ["version"]
+description = "Multiconfigurational X-ray spectroscopy: L-edge XAS/RIXS from CASCI/MC-PDFT with spin-orbit coupling"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy", "pyscf>=2.14", "pyscf-forge", "matplotlib"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+mcxray = "mcxray.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "mcxray.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: runs the TiCl3 pipeline end to end (minutes)"]

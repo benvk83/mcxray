@@ -1,0 +1,27 @@
+# TiCl3 -- pyramidal Ti(III), 3d^1, 4 atoms, 85 AOs in def2-SVP.
+# The shipped demo: steps 01-06 run in minutes.
+#
+#   mcxray 01 --system=ticl3      (any step; `ticl3` resolves to this folder)
+
+name     = "ticl3"
+orca_job = "ticl3_casscf"       # step 01 runs ticl3_casscf.inp
+gbw      = "ticl3_casscf"       # .gbw holding the CASSCF orbitals
+xyz      = "ticl3_opt.xyz"
+
+basis  = "def2-svp"
+charge = 0
+spin   = 1
+metal  = "Ti"
+
+nelec_valence = 1
+norb_valence  = 5
+# d^1 ligand-field manifold: 5 states, all doublets.
+n_valence_roots = 5
+# The 30 lowest core-excited roots. This is a truncation: 2p^5 3d^2 is
+# 6 x C(10,2) = 270 microstates = 75 doublets + 30 quartets = 105 states
+# spanning 8.1 eV (CASCI), and the lowest 30 (13 doublets, 17 quartets)
+# cover the first 2.1 eV. `mcxray 04 --dense` solves all 105.
+nroots_core = 30
+spins = [0.5, 1.5]
+# 3 x 85^4 x 8 = 1.25 GB; 200 MB batches keep it off a laptop's swap.
+soc_max_bytes = "200m"
