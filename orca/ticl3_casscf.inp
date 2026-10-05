@@ -1,0 +1,27 @@
+! CASSCF def2-SVP TightSCF NoAutoStart
+# Valence-only SA-CASSCF for the L-edge workflow: Ti 3d manifold ONLY.
+# The 2p core is deliberately NOT in this active space -- it is spliced in
+# afterwards, on the PySCF side, for the CASCI step (scripts/03).
+#
+# ActOrbs DOrbs makes ORCA rotate the metal d-shell into the active space
+# rather than taking whatever five orbitals happen to straddle the Fermi
+# level (for TiCl3/def2-SVP the naive choice would grab MO 37, which is
+# only 1.2% Ti 3d -- see common.print_orbital_table).
+#
+# def2-SVP is all-electron: no ECP, so the Ti 2p orbitals this workflow
+# needs are present in the resulting .gbw.
+
+%casscf
+  nel     1
+  norb    5
+  mult    2
+  nroots  5
+  actorbs dorbs
+end
+
+* xyz 0 2
+Ti          0.00102937295132      0.00000051041430     -0.44446015752021
+Cl          2.19897797218127     -0.00000153882494     -0.44773700326685
+Cl         -1.10000487125569      1.90237501836060     -0.44490133186414
+Cl         -1.10000247387690     -1.90237398994996     -0.44490150734880
+*

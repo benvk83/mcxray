@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '{print $6, $7}')",
+      "Bash(node scripts/validate_palette.js \"#2a78d6,#eb6834\" --mode light)",
+      "Read(//usr/bin/**)",
+      "Bash(conda run *)",
+      "Bash(python3 -c \"print\\('python available'\\)\")",
+      "Bash(awk 'NR>2{print $1}' cracac-r2scan3c-opt1.xyz)",
+      "Read(//home/benvk/orca_6_1_1/**)",
+      "Bash(conda env *)",
+      "Bash(python -c \"import pyscf, numpy; print\\('pyscf', pyscf.__version__\\); import pyscf.mcpdft; print\\('forge ok'\\)\")",
+      "Bash(mkdir -p /tmp/claude-1000/-home-benvk-calc-pyscf/6488c607-e17c-4734-ba49-a2c05b356c20/scratchpad/gbwprobe)",
+      "Bash(cp /home/benvk/calc/pyscf/run/cr/cracac/cracac-cas35.gbw /tmp/claude-1000/-home-benvk-calc-pyscf/6488c607-e17c-4734-ba49-a2c05b356c20/scratchpad/gbwprobe/probe.gbw)",
+      "Bash(/home/benvk/orca_6_1_1/orca_2mkl probe *)"
+    ]
+  }
+}
