@@ -61,21 +61,31 @@ GAMMA_FINAL_EV = 0.15
 # Orbital bookkeeping / active space
 # ---------------------------------------------------------------------------
 def ao_character(mol, mo_coeff, ao_labels_substr):
-    """Return, for every MO, the fraction of its Mulliken-like AO weight
-    (sum of C_{mu,i}^2 over normalized AOs, i.e. assuming an orthogonal-ish
-    minimal-overlap estimate) that sits on AOs whose label contains
-    `ao_labels_substr` (e.g. 'Ti 2p', 'Ti 3d').
+    """Return, for every MO, the fraction of its Mulliken population
+    that sits on the AOs matching `ao_labels_substr`.
 
-    This is a quick-look diagnostic for picking active-space orbitals by
-    hand; it is deliberately simple (no full Mulliken partitioning with S)
-    -- always eyeball the printed table before trusting the selection.
+    Parameters
+    ----------
+    mol : pyscf.gto.Mole
+    mo_coeff : ndarray, shape (nao, nmo)
+        MO coefficients in the AO basis of `mol`.
+    ao_labels_substr : str
+        Substring matched against `mol.ao_labels()` (e.g. 'Ti 2p', 'Ti 3d').
+        The match is literal: 'Ti 3d' does not include d shells labelled
+        4d, 5d, ..., and it sums over every Ti atom in the molecule.
+
+    Returns
+    -------
+    frac : ndarray, shape (nmo,)
+        Fraction of each MO's population on the matching AOs.
     """
     s = mol.intor_symmetric('int1e_ovlp')
     labels = mol.ao_labels()
     mask = np.array([ao_labels_substr in lab for lab in labels])
     # weight of AO mu in MO i, properly using the overlap metric:
     # population_mu(i) = C_mu,i * (S C)_mu,i
-    sc = s.dot(mo_coeff)
+    # sc = s.dot(mo_coeff)
+    sc = s @ mo_coeff
     pop = mo_coeff * sc  # elementwise, shape (nao, nmo)
     frac = pop[mask, :].sum(axis=0) / pop.sum(axis=0)
     return frac
@@ -83,15 +93,23 @@ def ao_character(mol, mo_coeff, ao_labels_substr):
 
 def print_orbital_table(mol, mo_energy, mo_coeff, mo_occ, metal_label,
                          indices=None):
-    """Human-checkable printout: index, energy (eV), occupation, and the
-    dominant AO character near `metal_label` (2p / 3d). Use this to confirm
-    or override the automatically-guessed active-space indices -- automatic
-    core/valence assignment is a heuristic, not a guarantee.
+    """Print a table of index, energy (eV), occupation, and the percentage
+    of `metal_label` 2p and 3d character for each MO.
 
-    `mo_energy` may be None, which is the normal case for orbitals read
-    from a CASSCF .gbw: those are natural orbitals, which carry occupation
-    numbers rather than canonical orbital eigenvalues. The energy column is
-    then printed as '--' instead of a meaningless number.
+    Parameters
+    ----------
+    mol : pyscf.gto.Mole
+    mo_energy : ndarray, shape (nmo,) or None
+        MO energies in Hartree. May be None, which is the normal case for
+        orbitals read from an ORCA CASSCF .gbw: those are natural orbitals,
+    mo_coeff : ndarray, shape (nao, nmo)
+        MO coefficients in the AO basis of `mol`.
+    mo_occ : ndarray, shape (nmo,)
+        MO occupation numbers.
+    metal_label : str
+        Atomic symbol of the absorbing atom.
+    indices : sequence of int, optional
+        MOs to print. Default is all of them.
     """
     frac_2p = ao_character(mol, mo_coeff, f'{metal_label} 2p')
     frac_3d = ao_character(mol, mo_coeff, f'{metal_label} 3d')

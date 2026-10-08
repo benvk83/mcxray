@@ -46,7 +46,37 @@ CORE_CHARACTER_MIN = 0.9
 
 def find_core_orbitals(mol, mo_coeff, metal_label='Ti', shell='2p',
                        n=N_CORE_ORB, character_min=CORE_CHARACTER_MIN):
-    """The `n` MOs with the highest metal-`shell` AO character."""
+    """Return the `n` MOs with the highest metal-`shell` AO character.
+
+    Parameters
+    ----------
+    mol : pyscf.gto.Mole
+    mo_coeff : ndarray, shape (nao, nmo)
+        MO coefficients in the AO basis of `mol`.
+    metal_label : str
+        Atomic symbol of the atom whose core shell is wanted
+        (e.g. 'Ti', 'Fe').
+    shell : str
+        Core shell label (e.g. '2p').
+    n : int
+        Number of core orbitals to return.
+    character_min : float
+        Minimum `shell` character every selected orbital must exceed.
+
+    Returns
+    -------
+    core_idx : list of int
+        Indices (columns of `mo_coeff`) of the core orbitals, in ascending
+        order.
+    core_char : ndarray, shape (n,)
+        `shell` character of each of those orbitals.
+
+    Raises
+    ------
+    RuntimeError
+        If any of the `n` selected orbitals has character at or below
+        `character_min`.
+    """
     frac = common.ao_character(mol, mo_coeff, f'{metal_label} {shell}')
     idx = np.sort(np.argsort(-frac)[:n])
     if not np.all(frac[idx] > character_min):
@@ -60,9 +90,28 @@ def find_core_orbitals(mol, mo_coeff, metal_label='Ti', shell='2p',
 def build_cas_mo(mo_coeff, core_idx, valence_idx, n_inactive):
     """Reorder MOs into [inactive | core+valence active | virtual].
 
-    `n_inactive` is the CASSCF inactive count from the valence calculation;
-    the core orbitals are removed from it and promoted into the active
-    space, so the returned `ncore` is `n_inactive - len(core_idx)`.
+    Parameters
+    ----------
+    mo_coeff : ndarray, shape (nao, nmo)
+        MO coefficients in the AO basis
+    core_idx : list of int
+        Indices of the core orbitals to be moved into the active space
+    valence_idx : list of int
+        Indices (columns of `mo_coeff`) of the valence active orbitals
+    n_inactive : int
+        CASSCF inactive count from the valence calculation. This still
+        includes the core orbitals, which are removed from it here
+
+    Returns
+    -------
+    cas_mo : ndarray, shape (nao, nmo)
+        Reordered MO coefficient matrix.
+    ncore : int
+        Size of the inactive block, `n_inactive - len(core_idx)`.
+    ncas : int
+        Number of active orbitals, `len(core_idx) + len(valence_idx)`.
+    core_local : list of int
+        Indices of the core orbitals within the active space.
     """
     active_idx = sorted(list(core_idx) + list(valence_idx))
     inactive = [i for i in range(n_inactive) if i not in active_idx]
