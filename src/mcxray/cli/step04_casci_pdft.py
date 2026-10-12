@@ -154,14 +154,28 @@ OTFNAL = 'tPBE'
 
 
 def make_reference_mf(mol, cas_mo, ncore, ncas, nelecas):
-    """A fully-populated mean-field object for MC-PDFT to hang off.
+    """A fully-populated mean-field object for CASCI/MC-PDFT. It is used
+    to hold the orbitals and integrals, but is not itself solved. It is 
+    required because pyscf's CASCI and MC-PDFT objects are built on top 
+    of a mean-field object, which is where they get their integrals from.
 
-    No SCF is run. The orbitals here are ORCA's SA-CASSCF orbitals, so a
-    PySCF ROHF solution would be both irrelevant and misleading -- CASCI
-    and MC-PDFT are handed `cas_mo` explicitly and never touch `mf`'s own
-    orbitals. What matters is that every attribute is *defined*: a previous
-    version of this workflow left `mf.mo_coeff is None`, which happened to
-    work only because nothing downstream read it.
+    Parameters
+    ----------
+    mol : pyscf.gto.Mole
+        The molecule for which to create the mean-field object.
+    cas_mo : numpy.ndarray
+        The CAS orbitals.
+    ncore : int
+        The number of core orbitals.
+    ncas : int
+        The number of active orbitals.
+    nelecas : int
+        The number of electrons in the active space.
+
+    Returns
+    -------
+    mf : pyscf.scf.ROHF
+        The mean-field object.
     """
     mf = scf.ROHF(mol)
     mf.mo_coeff = cas_mo
